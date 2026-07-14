@@ -45,13 +45,9 @@ SoftwareSerial espSerial(A0, A1);   // RX, TX
 uint32_t syncUnix = 0;        // 最近一次对表的时间(0=还没对过表,显示 no clock)
 unsigned long syncMs = 0;     // 对表那一刻的 millis()
 
-// ===== 白名单:数组下标就是存进EEPROM里的"卡编号"(0/1/2),不要随便调换顺序 =====
+// ===== 白名单:真实卡号在 secrets.h(不进git)——复制 secrets.h.example 填你的卡 =====
 struct Card { const char* uid; const char* name; };
-const Card KNOWN[] = {
-  {"a1b2c3d4", "Jerry"},    // 0 主卡
-  {"b2c3d4e5", "Guest 1"},  // 1
-  {"c3d4e5f6", "Guest 2"},  // 2
-};
+#include "secrets.h"   // 定义 KNOWN[](数组下标=EEPROM里的卡编号,不要随便调换顺序)
 const int KNOWN_LEN = sizeof(KNOWN) / sizeof(KNOWN[0]);
 const uint8_t DENIED_IDX = 255;   // 陌生卡在日志里用这个编号表示
 

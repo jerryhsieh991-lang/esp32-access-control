@@ -13,8 +13,16 @@ import serial
 CSV_PATH = os.path.expanduser("~/Projects/esp32-access-control/access_log.csv")
 PAUSE_FLAG = "/tmp/accesslogger.pause"
 HEADER = ["mac_time", "device_unix", "device_time", "name", "uid", "result"]
-WEBHOOK = "https://script.google.com/macros/s/YOUR_DEPLOYMENT_ID/exec"
-UID_BY_NAME = {"Jerry": "a1b2c3d4", "Guest 1": "b2c3d4e5", "Guest 2": "c3d4e5f6"}
+
+# 私密配置(webhook地址、卡号表)放在 config.json 里,不进 git —— 模板见 config.example.json
+_CONFIG_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config.json")
+try:
+    with open(_CONFIG_PATH) as _f:
+        _cfg = json.load(_f)
+except FileNotFoundError:
+    raise SystemExit("缺少 config.json:请 cp config.example.json config.json 并填入你的 webhook 和卡号")
+WEBHOOK = _cfg["webhook"]
+UID_BY_NAME = _cfg["uid_by_name"]
 
 
 def append_row(row):

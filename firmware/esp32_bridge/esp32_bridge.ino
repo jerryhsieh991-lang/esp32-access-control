@@ -41,19 +41,15 @@
 #include <HTTPClient.h>
 #include <time.h>
 
-// ================== 改成你家WiFi ==================
-#define WIFI_SSID "your-wifi-name"
-#define WIFI_PASS "your-wifi-password"
-// ===================================================
+// WiFi账号密码 + webhook 都在 secrets.h(不进git)——复制 secrets.h.example 填你的值
+#include "secrets.h"
 
 // 洛杉矶时区(带夏令时自动切换),NTP服务器用两个,一个挂了还有备用的
 #define TZ_INFO "PST8PDT,M3.2.0,M11.1.0"
 const char *NTP_SERVER1 = "pool.ntp.org";
 const char *NTP_SERVER2 = "time.google.com";
 
-// 门禁日志要POST到的网页(Google Apps Script)
-const char *WEBHOOK_URL =
-    "https://script.google.com/macros/s/YOUR_DEPLOYMENT_ID/exec";
+// 门禁日志要POST到的网页(Google Apps Script)—— WEBHOOK_URL 定义在 secrets.h
 
 #define LED_PIN 2
 

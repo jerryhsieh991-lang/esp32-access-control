@@ -1,0 +1,8 @@
+{
+  "webhook": "https://script.google.com/macros/s/YOUR_DEPLOYMENT_ID/exec",
+  "uid_by_name": {
+    "Jerry": "a1b2c3d4",
+    "Guest 1": "b2c3d4e5",
+    "Guest 2": "c3d4e5f6"
+  }
+}

@@ -23,6 +23,9 @@
 - **路线 A(本教程主线)**:Uno + LCD + RC522,Mac 或 ESP32 负责联网。适合手上是 Uno 套件的人。
 - **路线 B(纯 ESP32 单板)**:一块 ESP32 搞定读卡+舵机开锁+网页面板,见 [GUIDE.md](GUIDE.md),固件在 `firmware/stage1~5`。
 
+> 🔑 **密钥管理**:所有私密值(webhook 地址、卡号、WiFi 密码)都放在被 gitignore 的
+> `secrets.h` / `config.json` 里,源码只提交 `*.example` 模板。照教程复制模板填入自己的值即可。
+
 ---
 
 ## 1. 零件清单(路线 A)
@@ -87,13 +90,10 @@ arduino-cli lib install MFRC522 RTClib
    arduino-cli upload -p /dev/cu.usbmodem101 --fqbn arduino:avr:uno uno_lcd_rfid
    ```
 2. 打开串口监视器(9600 波特),刷卡,**把打印出来的卡号(8 位十六进制)抄下来**。
-3. 打开 `firmware/uno_access_log/uno_access_log.ino`,把白名单 `KNOWN[]` 里的示例卡号换成你自己的:
-   ```cpp
-   const Card KNOWN[] = {
-     {"a1b2c3d4", "Jerry"},    // ← 换成你抄下来的卡号和名字
-     {"b2c3d4e5", "Guest 1"},
-     {"c3d4e5f6", "Guest 2"},
-   };
+3. 配置白名单:
+   ```bash
+   cd uno_access_log
+   cp secrets.h.example secrets.h    # 然后把 secrets.h 里的示例卡号换成你抄下来的
    ```
 4. 烧录 `firmware/uno_access_log/`(正式版)。刷已知卡显示 `Welcome 名字`,陌生卡显示 `Access denied`,每次刷卡都会存进 EEPROM(断电不丢,环形覆盖,容量 200 条)。
 
@@ -116,14 +116,15 @@ arduino-cli lib install MFRC522 RTClib
    - 执行身份:**我**
    - 谁可以访问:**任何人**
 4. 复制部署后的 URL(形如 `https://script.google.com/macros/s/xxxxx/exec`),填到:
-   - `logger.py` 顶部的 `WEBHOOK`
-   - `firmware/esp32_bridge/esp32_bridge.ino` 的 `WEBHOOK_URL`
+   - `config.json`(第 6 步创建)
+   - `firmware/esp32_bridge/secrets.h`(第 7 步创建)
 
-> ⚠️ 这个 URL 就是你的"写入密码"——知道 URL 的人就能往你表格灌数据。**不要把填好真实 URL 的代码公开。**
+> ⚠️ 这个 URL 就是你的"写入密码"——知道 URL 的人就能往你表格灌数据。它只该出现在被 gitignore 的文件里。
 
 ## 6. 路线 A-1:Mac 当记录器(logger.py)
 
 ```bash
+cp config.example.json config.json   # 填入你的 webhook 和"名字→卡号"对照表
 python3 -m venv .venv && .venv/bin/pip install pyserial
 .venv/bin/python logger.py &
 ```
@@ -148,7 +149,11 @@ Uno 5V → ESP32 VIN,GND 共地(必须!)
 ```
 
 **烧录:**
-1. 打开 `firmware/esp32_bridge/esp32_bridge.ino`,改顶部的 `WIFI_SSID` / `WIFI_PASS`,填第 5 步的 `WEBHOOK_URL`。
+1. 配置:
+   ```bash
+   cd firmware/esp32_bridge
+   cp secrets.h.example secrets.h    # 填你家 WiFi 名/密码 + 第5步的 webhook URL
+   ```
 2. ESP32 用 USB 线接电脑:
    ```bash
    arduino-cli compile --fqbn esp32:esp32:esp32 esp32_bridge
@@ -175,7 +180,7 @@ Uno 5V → ESP32 VIN,GND 共地(必须!)
 
 ## 9. 安全须知
 
-- 白名单卡号写在固件里,**公开代码前换成占位符**(本仓库里的就是示例值)。
+- 真实卡号、webhook、WiFi 密码只存在于 `secrets.h` / `config.json`(已 gitignore),**提交代码前确认没把它们加进去**(`git status` 里不该出现)。
 - RFID 卡的 UID 可以被廉价设备克隆,这套系统适合**记录/考勤**场景;真拿来控制门锁,请换支持加密扇区的卡片方案。
 - Apps Script 的 webhook URL 等于写入权限,泄露了就**重新部署**换一个 URL。
 
@@ -185,11 +190,14 @@ Uno 5V → ESP32 VIN,GND 共地(必须!)
 README.md                  ← 本教程(路线 A:Uno 主线)
 GUIDE.md                   ← 路线 B:纯 ESP32 单板教程(舵机开锁+网页面板)
 logger.py                  ← Mac 记录器:对表 + 补账 + CSV + Google Sheet
+config.example.json        ← logger 配置模板(复制为 config.json 填真实值)
 google-apps-script/Code.gs ← Google Sheet 接收端
 firmware/
   uno_lcd_rfid/            ← 第一阶段:LCD + 读卡(先跑通这个)
   uno_access_log/          ← 正式固件:白名单 + EEPROM + 软时钟 + 双串口
+    secrets.h.example      ←   白名单模板(复制为 secrets.h 填你的卡号)
   esp32_bridge/            ← ESP32 WiFi 桥:NTP 授时 + 直传 Google Sheet
+    secrets.h.example      ←   WiFi/webhook 模板(复制为 secrets.h)
   stage1~5_*/              ← 路线 B 的五个阶段(纯 ESP32)
   diag_*/                  ← 硬件诊断小工具(引脚探测、RC522 自检等)
 ```

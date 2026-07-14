@@ -1,0 +1,18 @@
+# 私密配置 —— 永远不进仓库
+config.json
+firmware/**/secrets.h
+
+# 本地数据 / 环境
+access_log.csv
+.venv/
+__pycache__/
+
+# AI 助手工作文件
+CLAUDE.md
+.claude/
+.playwright-mcp/
+deploy-dialog.yml
+webapp-config.yml
+
+# 系统杂物
+.DS_Store
