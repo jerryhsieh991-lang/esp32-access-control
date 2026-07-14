@@ -1,5 +1,7 @@
 # RFID 门禁记录系统(Arduino Uno + ESP32 桥)
 
+> English version: [README.en.md](README.en.md)
+
 刷 RFID 卡 → LCD 显示欢迎/拒绝 + 时间 → 记录**同时**存进 Uno 的 EEPROM(断电不丢)
 → 并实时上传到 **Google Sheet**(通过 Mac 上的 Python 记录器,或 ESP32 WiFi 桥,二选一/都可以)。
 
